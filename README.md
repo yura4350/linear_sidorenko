@@ -18,16 +18,16 @@ The core idea is to find an `m × n` matrix `M` with **non-negative entries** th
 2. Calculate the eigenvalues `λ` of `M_tilde`.
 3. Evaluate the inequality:
 
-   \[
-   \sum \lambda^5 \geq \frac{\left(\sum M\right)^{15}}{(mn)^{10}}
-   \]
+```math
+\sum \lambda^5 \geq \frac{\left(\sum M\right)^{15}}{(mn)^{10}}
+```
 
 ### 🔎 Conjecture Gap
 
 The algorithm computes the **Gap** as:
 
 ```math
-Gap = (sum of λ^5) - (Right Hand Side)
+\text{Gap} = \sum \lambda^5 - \frac{\left(\sum M\right)^{15}}{(mn)^{10}}
 ```
 
 - The **conjecture holds** if this `Gap ≥ 0`.
