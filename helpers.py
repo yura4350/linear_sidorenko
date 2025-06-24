@@ -1,0 +1,89 @@
+import numpy as np
+import random
+from numba import njit
+
+@njit
+def build_M_tilde(M):
+    """
+    Constructs the mn x mn matrix M_tilde from an m x n matrix M.
+    This function is JIT-compiled with Numba for performance.
+    """
+    m, n = M.shape
+    mn = m * n
+    M_tilde = np.zeros((mn, mn))
+
+    # Pre-calculate square roots of M's entries to speed up the inner loop
+    sqrt_M = np.sqrt(M)
+
+    # Iterate through the indices of M_tilde
+    for i in range(mn):
+        for j in range(mn):
+            # Map flat indices i, j back to 2D indices (a,b) and (c,d)
+            a = i // n
+            b = i % n
+            c = j // n
+            d = j % n
+            
+            # This check handles the case where an entry in M is zero
+            if M[a, b] == 0 or M[c, d] == 0 or M[a, d] == 0:
+                M_tilde[i, j] = 0
+            else:
+                # The formula from the image
+                M_tilde[i, j] = M[c, b] * sqrt_M[a, b] * sqrt_M[c, d] * sqrt_M[a, d]
+
+    return M_tilde
+
+def calculate_eigenvalue_gap(M):
+    """
+    Calculates the gap in the eigenvalue formulation of Sidorenko's conjecture
+    for H = K5,5 \ C10.
+    
+    Returns:
+        The value of (sum(lambda^5)) - (RHS).
+        A negative value supports the conjecture for this M.
+        A positive value would be a counterexample.
+    """
+    m, n = M.shape
+    mn = m * n
+
+    # 1. Build the transformed matrix M_tilde
+    M_tilde = build_M_tilde(M)
+
+    # 2. Calculate the sum of the 5th powers of its eigenvalues.
+    #    numpy.linalg.eigh is used because M_tilde is symmetric.
+    eigenvalues = np.linalg.eigh(M_tilde)[0]
+    sum_lambda_5 = np.sum(eigenvalues**5)
+
+    # 3. Calculate the right-hand side (RHS) of the inequality
+    norm_M1 = np.sum(M)
+    if norm_M1 == 0: # Avoid division by zero
+        return sum_lambda_5 
+    
+    rhs = (norm_M1**15) / (mn**10)
+
+    # 4. Calculate the gap
+    gap = sum_lambda_5 - rhs
+    return gap
+
+def perturb_M(M):
+    """
+    Perturbs a non-symmetric matrix M while keeping entries in [0, 1].
+    """
+    M_new = M.copy()
+    m, n = M.shape
+    
+    # Pick a random entry to increase and one to decrease
+    i_inc, j_inc = random.randint(0, m - 1), random.randint(0, n - 1)
+    i_dec, j_dec = random.randint(0, m - 1), random.randint(0, n - 1)
+    
+    # Ensure we don't pick the same entry for both
+    while i_inc == i_dec and j_inc == j_dec:
+        i_dec, j_dec = random.randint(0, m - 1), random.randint(0, n - 1)
+
+    change = random.uniform(0.001, 0.01)
+
+    # Apply perturbations, clamping the values between 0 and 1
+    M_new[i_inc, j_inc] = min(1.0, M_new[i_inc, j_inc] + change)
+    M_new[i_dec, j_dec] = max(0.0, M_new[i_dec, j_dec] - change)
+    
+    return M_new
