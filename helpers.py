@@ -79,6 +79,6 @@ def perturb_M(M):
 
     # Apply perturbations. NO upper clamp on the increase - can implement if decided to cap the values of the matrix in [0, 1] range.
     M_new[i_inc, j_inc] = M_new[i_inc, j_inc] + change
-    M_new[i_dec, j_dec] = max(0.0, M_new[i_dec, j_dec] - change) # Clamp at 0
+    M_new[i_dec, j_dec] = max(0.0, M_new[i_dec, j_dec] - change) # Clamp at 0 - but maybe implement some other logic (do we want zeros?)
     
     return M_new
