@@ -28,7 +28,6 @@ def build_M_tilde(M):
             if M[a, b] == 0 or M[c, d] == 0 or M[a, d] == 0:
                 M_tilde[i, j] = 0
             else:
-                # The formula from the image
                 M_tilde[i, j] = M[c, b] * sqrt_M[a, b] * sqrt_M[c, d] * sqrt_M[a, d]
 
     return M_tilde
@@ -50,16 +49,16 @@ def calculate_eigenvalue_gap(M):
     M_tilde = build_M_tilde(M)
 
     # 2. Calculate the sum of the 5th powers of its eigenvalues.
-    #    numpy.linalg.eigh is used because M_tilde is symmetric.
-    eigenvalues = np.linalg.eigh(M_tilde)[0]
-    sum_lambda_5 = np.sum(eigenvalues**5)
+    
+    eigenvalues = np.linalg.eig(M_tilde)[0]
+    sum_lambda_5 = np.sum(eigenvalues**5).real
 
     # 3. Calculate the right-hand side (RHS) of the inequality
-    norm_M1 = np.sum(M)
+    norm_M1 = np.sum(M) # Sum of the values in the matrix
     if norm_M1 == 0: # Avoid division by zero
         return sum_lambda_5 
     
-    rhs = (norm_M1**15) / (mn**10)
+    rhs = (norm_M1**15) / (mn**10) # Calculated RHS
 
     # 4. Calculate the gap
     gap = sum_lambda_5 - rhs
@@ -67,7 +66,7 @@ def calculate_eigenvalue_gap(M):
 
 def perturb_M(M):
     """
-    Perturbs a non-symmetric matrix M while keeping entries in [0, 1].
+    Perturbs a non-symmetric matrix M, values are [0, inf)
     """
     M_new = M.copy()
     m, n = M.shape
@@ -76,14 +75,10 @@ def perturb_M(M):
     i_inc, j_inc = random.randint(0, m - 1), random.randint(0, n - 1)
     i_dec, j_dec = random.randint(0, m - 1), random.randint(0, n - 1)
     
-    # Ensure we don't pick the same entry for both
-    while i_inc == i_dec and j_inc == j_dec:
-        i_dec, j_dec = random.randint(0, m - 1), random.randint(0, n - 1)
+    change = random.uniform(0.01, 0.05)
 
-    change = random.uniform(0.001, 0.01)
-
-    # Apply perturbations, clamping the values between 0 and 1
-    M_new[i_inc, j_inc] = min(1.0, M_new[i_inc, j_inc] + change)
-    M_new[i_dec, j_dec] = max(0.0, M_new[i_dec, j_dec] - change)
+    # Apply perturbations. NO upper clamp on the increase - can implement if decided to cap the values of the matrix in [0, 1] range.
+    M_new[i_inc, j_inc] = M_new[i_inc, j_inc] + change
+    M_new[i_dec, j_dec] = max(0.0, M_new[i_dec, j_dec] - change) # Clamp at 0
     
     return M_new

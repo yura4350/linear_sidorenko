@@ -2,7 +2,6 @@ import numpy as np
 from time import time
 from helpers import calculate_eigenvalue_gap, perturb_M
 
-# ... NMCS_M function is unchanged ...
 def NMCS_M(current_M, steps, score_function):
     """
     Local Monte Carlo search over the space of matrices M.
@@ -36,7 +35,6 @@ def AMCS_M(initial_M, max_depth=5, max_level=3):
     depth = 0
     level = 1
     
-    # Main AMCS loop
     while level <= max_level:
         nmcs_steps = 20 * level
 
@@ -68,13 +66,10 @@ def AMCS_M(initial_M, max_depth=5, max_level=3):
     print(f"Final Violation Score: {final_score:.4e}")
     print(f"Final Conjecture Gap (sum(L^5) - RHS): {final_gap:.4e}")
 
-    # ===================================================================
-    # --- THIS IS THE CORRECTED LOGIC ---
     if final_gap < 0:
         print("\n\n*** POTENTIAL COUNTEREXAMPLE FOUND! ***")
         print("The conjecture gap is negative.")
     else:
         print("\nNo counterexample found. The conjecture holds for the final matrix.")
-    # ===================================================================
     
     return current_M, final_gap

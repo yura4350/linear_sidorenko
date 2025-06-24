@@ -4,10 +4,9 @@ from amcs_eigenvalue import AMCS_M
 
 if __name__ == "__main__":
     # Define the dimensions of the matrix M to search over.
-    # We can start with a simple 5x5 case.
     m, n = 10, 10
     
-    # Define an initial random M with non-negative entries between 0 and 1.
+    # Define an initial random M with non-negative entries in [0, 1]. May be changed for [0, inf)
     # A non-uniform start might be more interesting.
     initial_M = np.random.rand(m, n)
     
